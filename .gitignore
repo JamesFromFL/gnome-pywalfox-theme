@@ -1,0 +1,6 @@
+pkg/
+src/
+*.pkg.tar.*
+.agents/
+.codex/
+source-repos/
