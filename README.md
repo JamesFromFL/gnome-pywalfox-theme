@@ -1,71 +1,126 @@
 # GNOME Pywalfox Theme
 
-`gnome-pywalfox-theme` is a small patcher for systems that already have:
+**Make firefox-gnome-theme follow your wallpaper colors.**
 
-1. `firefox-gnome-theme`
-2. Pywalfox and its browser extension
+`gnome-pywalfox-theme` is a tiny patcher for the rice goblins who want Firefox to actually match the rest of their desktop.
 
-It keeps Firefox GNOME Theme's layout, but changes its color layer so GNOME theme variables follow the live browser-theme variables that Pywalfox updates. When Pywalfox refreshes after a wallpaper/color change, the GNOME-styled browser follows the new colors without regenerating this patch.
+You already have:
 
-## What Gets Patched
+* **Firefox GNOME Theme** for that clean GNOME-style Firefox layout
+* **Pywalfox** for wallpaper-based browser colors
 
-The patcher changes the installed Firefox GNOME Theme at `/usr/lib/firefox-gnome-theme`:
+This project glues them together.
 
-- copies `pywalfox-colors.css` to `theme/colors/pywalfox.css`
-- imports that file from `theme/gnome-theme.css` after Firefox GNOME Theme's adaptive-color extension layer
-- imports that same color layer from `userContent.css` after the internal page styles so Pywalfox's new-tab colors remain authoritative there too
+Firefox keeps the GNOME layout.
+Pywalfox brings the colors.
+Your browser stops looking like it missed the memo.
 
-No profile files are changed. The browser profile must already be set up for Firefox GNOME Theme in the normal way.
+## Requirements
 
-## Why This Works
+You need to have:
 
-Pywalfox updates Firefox browser-theme fields such as:
+* `firefox-gnome-theme` or `firefox-gnome-theme-git`
+* Pywalfox
+* The Pywalfox browser extension
 
-- frame/background
-- toolbar
-- toolbar field
-- popup
-- sidebar
-- selected tab
-- accent/highlight
+This does **not** set up firefox-gnome-theme for you.
+This does **not** configure pywalfox for you.
+This is the dumb little bridge that makes them kiss.
 
-Firefox exposes those as live CSS variables in browser chrome. The patch maps those variables onto Firefox GNOME Theme's `--gnome-*` color variables while leaving its layout CSS alone.
+## Install
 
-## Manual Use
+### AUR
 
-Patch a disposable copy:
+Install using your favorite AUR helper.
 
 ```sh
-cp -a /usr/lib/firefox-gnome-theme /tmp/firefox-gnome-theme
-./patch-gnome-firefox-theme /tmp/firefox-gnome-theme
+yay -S gnome-pywalfox-theme
+```
+The pacman hook automatically reapplies the patch whenever `firefox-gnome-theme` or `firefox-gnome-theme-git` gets installed or upgraded.
+
+Then fully restart Firefox, LibreWolf, or whatever Firefox-based browser you are using.
+
+### Git / makepkg
+
+```sh
+git clone https://github.com/JamesFromFL/gnome-pywalfox-theme.git
+cd gnome-pywalfox-theme
+makepkg -si
 ```
 
-Patch the installed theme:
+This installs the patcher, the color bridge, and the pacman hook like the AUR. Still need to fully restart your browser.
+
+### Manual patch only
 
 ```sh
+git clone https://github.com/JamesFromFL/gnome-pywalfox-theme.git
+cd gnome-pywalfox-theme
 sudo ./patch-gnome-firefox-theme
 ```
 
-Remove the patch from an installed or disposable theme tree:
+This patches the installed `firefox-gnome-theme` tree directly, but does not install the pacman hook.
+
+## Uninstall
+
+If installed as a package, remove it with your package manager.
 
 ```sh
+yay -R gnome-pywalfox-theme
+```
+
+If you used the manual patch-only method:
+
+```sh
+cd gnome-pywalfox-theme
 sudo ./patch-gnome-firefox-theme --remove
 ```
 
-Restart the full browser process after installing, upgrading, or removing the patch. Future Pywalfox color updates are live browser-theme updates and do not require rerunning the patcher.
+The uninstall removes:
 
-## Package Flow
+- the Pywalfox color file
+- the imports added to Firefox GNOME Theme
+- the pacman hook, if installed as a package
 
-The package installs:
+Restart your browser after uninstall is done.
 
-- `/usr/bin/gnome-pywalfox-theme-patch`
-- `/usr/share/gnome-pywalfox-theme/pywalfox-colors.css`
-- `/usr/share/libalpm/hooks/90-gnome-pywalfox-theme.hook`
+## What It Actually Patches
 
-The pacman hook reapplies the patch whenever `firefox-gnome-theme` or `firefox-gnome-theme-git` is installed or upgraded.
+The patcher changes the installed Firefox GNOME Theme tree.
 
-Removing `gnome-pywalfox-theme` removes its imports and copied color file from the installed Firefox GNOME Theme.
+It copies:
+
+```sh
+pywalfox-colors.css
+```
+
+to:
+
+```sh
+theme/colors/pywalfox.css
+```
+
+Then it imports that file through firefox-gnome-theme’s update-safe custom import points when available:
+
+```sh
+customChrome.css
+customContent.css
+```
+
+For older firefox-gnome-theme installs, it falls back to patching:
+
+```sh
+theme/gnome-theme.css
+userContent.css
+```
+
+Your Firefox profile files are not touched.
+
+## The Vibe
+
+I just wanted to make these two projects work together so this is my Frankenstein.
+I will try to keep up on maintaining this if something breaks from an update.
+If you notice a bug or anything leave an issue!
 
 ## License
 
-`gnome-pywalfox-theme` is licensed under MPL-2.0.
+Licensed under **MPL-2.0**.
