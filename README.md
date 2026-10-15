@@ -15,6 +15,14 @@ Firefox keeps the GNOME layout.
 Pywalfox brings the colors.
 Your browser stops looking like it missed the memo.
 
+The bridge maps colors by element: popovers use Pywalfox's popup colors,
+entries use its field colors, and cards use its new-tab card color. GNOME
+Theme supplies the Adwaita borders, shadows, and control states.
+
+Pywalfox remains the color source. This package does not read your GTK
+stylesheet. To match a customized GNOME Web palette exactly, configure
+Pywalfox with the same surface, text, and accent colors as your GTK theme.
+
 ## Requirements
 
 You need to have:
@@ -114,6 +122,50 @@ userContent.css
 ```
 
 Your Firefox profile files are not touched.
+
+## Color compatibility
+
+Version 0.1.5 supports the current Firefox color variable names and keeps
+fallbacks for older names. The bridge only overrides browser colors while
+a browser theme is active. With no browser theme, GNOME Theme supplies the colors.
+New-tab overrides apply only when Firefox exposes themed new-tab colors.
+
+| GNOME element | Pywalfox / Firefox color source |
+| --- | --- |
+| Window, header, tab strip | Frame background and frame text |
+| Address and search entries | Toolbar field background and text |
+| Menus, popovers, address suggestions | Popup background and text |
+| Cards | New-tab card background, with toolbar background as fallback |
+| Sidebars | Sidebar background |
+| Selected tab | Tab-line color (also Pywalfox's selected-tab color by default) |
+| Accent, focus, loading indicator | Tab-loading color (Pywalfox's primary accent by default) |
+
+GNOME Theme reuses Firefox's native selection and selected-tab variables for
+its own output. The bridge reads independent inputs for those colors to
+avoid circular CSS variables and empty colors. Palette changes continue to
+apply live without regenerating the bridge.
+
+## Development checks
+
+Run the offline patcher tests and shell checks:
+
+```sh
+python tests/test_patcher.py
+shellcheck patch-gnome-firefox-theme
+bash -n PKGBUILD gnome-pywalfox-theme.install
+```
+
+To check resolved colors in an isolated headless Firefox profile, pass a
+complete Firefox GNOME Theme checkout or installed tree:
+
+```sh
+python tests/test_colors.py --theme-dir /usr/lib/firefox-gnome-theme
+```
+
+The browser tests require Python 3 and Firefox with Marionette support. They
+create and remove a temporary profile; they do not use your personal profile.
+An optional `--firefox librewolf` checks LibreWolf, and `--screenshot PATH`
+saves a screenshot of the test profile.
 
 ## The Vibe
 

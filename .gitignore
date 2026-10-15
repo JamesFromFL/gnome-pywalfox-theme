@@ -4,3 +4,4 @@ src/
 .agents/
 .codex/
 source-repos/
+__pycache__/
